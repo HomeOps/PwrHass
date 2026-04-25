@@ -10,7 +10,7 @@ function Get-HAConfig {
     [CmdletBinding()]
     param()
 
-    $path = Join-Path $HOME '.pwrhass\config.json'
+    $path = Join-Path $HOME '.pwrhass' 'config.json'
     if (-not (Test-Path $path)) {
         throw "PwrHass not configured. Run: Connect-HomeAssistant -BaseUrl <url> -Token <pat>"
     }
