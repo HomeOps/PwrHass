@@ -1,0 +1,14 @@
+# PowerShell module build artifacts
+*.nupkg
+*.zip
+
+# Local test scratch
+*.local.ps1
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
