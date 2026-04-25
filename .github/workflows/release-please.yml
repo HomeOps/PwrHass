@@ -1,0 +1,73 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' && vars.PUBLISH_PSGALLERY == 'true' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set publish identity env vars
+        shell: pwsh
+        run: |
+          $owner     = '${{ github.repository_owner }}'
+          $serverUrl = '${{ github.server_url }}'
+          $repo      = '${{ github.repository }}'
+          "PWRHASS_AUTHOR=$owner"                | Out-File $env:GITHUB_ENV -Append
+          "PWRHASS_PROJECT_URI=$serverUrl/$repo" | Out-File $env:GITHUB_ENV -Append
+
+      - name: Substitute env vars into manifest
+        shell: pwsh
+        run: |
+          $psd1 = Get-Content .\PwrHass.psd1 -Raw
+          $psd1 = $psd1 -replace [regex]::Escape('$env:PWRHASS_AUTHOR'),      $env:PWRHASS_AUTHOR
+          $psd1 = $psd1 -replace [regex]::Escape('$env:PWRHASS_PROJECT_URI'), $env:PWRHASS_PROJECT_URI
+          $psd1 | Set-Content .\PwrHass.psd1 -NoNewline
+
+      - name: Inject CHANGELOG.md into ReleaseNotes
+        shell: pwsh
+        run: |
+          $changelog = Get-Content .\CHANGELOG.md -Raw
+          $changelog = $changelog -replace 'https://github\.com/[^/]+/[^/()\s]+/', '../../'
+          $notes = $changelog.Substring(0, [Math]::Min(1024, $changelog.Length))
+          Update-ModuleManifest -Path .\PwrHass.psd1 -ReleaseNotes $notes
+
+      - name: Verify manifest version matches release tag
+        shell: pwsh
+        run: |
+          $tag = '${{ needs.release-please.outputs.tag_name }}' -replace '^v',''
+          $manifest = Test-ModuleManifest -Path .\PwrHass.psd1
+          Write-Host "Release tag: $tag"
+          Write-Host "Manifest version: $($manifest.Version)"
+          if ($manifest.Version.ToString() -ne $tag) {
+            throw "Version mismatch: manifest=$($manifest.Version) tag=$tag"
+          }
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          Publish-Module -Path . -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
