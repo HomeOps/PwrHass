@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/HomeOps/PwrHass/compare/v0.5.0...v0.6.0) (2026-04-26)
+
+
+### Features
+
+* add Get-HAEntityCorrelation cmdlet ([#9](https://github.com/HomeOps/PwrHass/issues/9)) ([52b093e](https://github.com/HomeOps/PwrHass/commit/52b093e094f401f4fa5ebc235591f131714090c8))
+
 ## [0.5.0](https://github.com/HomeOps/PwrHass/compare/v0.4.0...v0.5.0) (2026-04-26)
 
 
