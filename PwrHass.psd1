@@ -22,6 +22,7 @@ PowerShellVersion = '5.1'
 FunctionsToExport = @(
     'Connect-HomeAssistant',
     'Get-HAConfig',
+    'Get-HALegacyZWaveRouter',
     'Get-HAState',
     'Get-HAZWaveNode',
     'Invoke-HAService',
@@ -32,7 +33,9 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 
-FileList = 'CLAUDE.md', 'CHANGELOG.md', 'README.md'
+FormatsToProcess = @('PwrHass.format.ps1xml')
+
+FileList = 'CLAUDE.md', 'CHANGELOG.md', 'README.md', 'PwrHass.format.ps1xml'
 
 PrivateData = @{
     PSData = @{
