@@ -2,6 +2,7 @@ $functions = @(
     'Connect-HomeAssistant'
     'Get-HAConfig'
     'Get-HAState'
+    'Get-HAZWaveNode'
     'Invoke-HAService'
     'Restart-HAIntegration'
 )
