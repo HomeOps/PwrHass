@@ -33,7 +33,9 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 
-FileList = 'CLAUDE.md', 'CHANGELOG.md', 'README.md'
+FormatsToProcess = @('PwrHass.format.ps1xml')
+
+FileList = 'CLAUDE.md', 'CHANGELOG.md', 'README.md', 'PwrHass.format.ps1xml'
 
 PrivateData = @{
     PSData = @{
