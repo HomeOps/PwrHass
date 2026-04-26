@@ -4,16 +4,20 @@ function Invoke-HAService {
     Call a Home Assistant service against an entity.
 
     .DESCRIPTION
-    Wraps POST /api/services/<domain>/<service>. The domain is derived from
-    the entity id (everything before the first dot). Connection details are
-    read from ~/.pwrhass/config.json (Connect-HomeAssistant first).
+    Wraps POST /api/services/<domain>/<service>. By default the domain is
+    derived from the entity id (everything before the first dot); pass
+    -Domain to override when the service lives on a different integration
+    than the entity (e.g. zwave_js.refresh_value targeting a sensor.*).
+    Connection details are read from ~/.pwrhass/config.json
+    (Connect-HomeAssistant first).
 
     .PARAMETER EntityId
     Target entity, e.g. 'light.den_bookshelve' or 'cover.kitchen_vent'.
 
     .PARAMETER Service
-    Service name on the entity's domain (e.g. 'turn_on', 'set_cover_position').
-    Defaults to 'turn_on'; pass -Off for the matching 'turn_off' shorthand.
+    Service name on the target domain (e.g. 'turn_on',
+    'set_cover_position', 'refresh_value'). Defaults to 'turn_on'; pass
+    -Off for the matching 'turn_off' shorthand.
 
     .PARAMETER Data
     Extra body fields merged into the request payload alongside entity_id.
@@ -21,6 +25,11 @@ function Invoke-HAService {
 
     .PARAMETER Off
     Shorthand: when set and -Service is unset, calls 'turn_off' instead of 'turn_on'.
+
+    .PARAMETER Domain
+    Override the service domain. Defaults to the entity's domain prefix.
+    Use this for cross-integration services like zwave_js.refresh_value
+    against a sensor.*, or homeassistant.turn_off against any entity.
 
     .EXAMPLE
     Invoke-HAService -EntityId light.den_bookshelve
@@ -32,6 +41,11 @@ function Invoke-HAService {
     Invoke-HAService -EntityId cover.kitchen_vent `
                      -Service set_cover_position `
                      -Data @{ position = 100 }
+
+    .EXAMPLE
+    # Force a Z-Wave node to push fresh values to HA
+    Invoke-HAService -EntityId sensor.east_bedroom_sensor_air_temperature `
+                     -Domain zwave_js -Service refresh_value
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     param(
@@ -44,7 +58,9 @@ function Invoke-HAService {
 
         [hashtable]$Data,
 
-        [switch]$Off
+        [switch]$Off,
+
+        [string]$Domain
     )
 
     if (-not $Service) {
@@ -52,8 +68,8 @@ function Invoke-HAService {
     }
 
     $cfg = Get-HAConfig
-    $domain = $EntityId.Split('.')[0]
-    $uri = "$($cfg.BaseUrl)/api/services/$domain/$Service"
+    if (-not $Domain) { $Domain = $EntityId.Split('.')[0] }
+    $uri = "$($cfg.BaseUrl)/api/services/$Domain/$Service"
 
     $payload = @{ entity_id = $EntityId }
     if ($Data) {
@@ -61,7 +77,7 @@ function Invoke-HAService {
     }
     $body = $payload | ConvertTo-Json -Compress
 
-    if (-not $PSCmdlet.ShouldProcess($EntityId, "$domain.$Service")) { return }
+    if (-not $PSCmdlet.ShouldProcess($EntityId, "$Domain.$Service")) { return }
 
     Write-Verbose "POST $uri  body=$body"
     $headers = @{
