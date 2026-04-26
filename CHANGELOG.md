@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/HomeOps/PwrHass/compare/v0.3.0...v0.4.0) (2026-04-26)
+
+
+### Features
+
+* add Get-HAZWaveNode cmdlet ([#5](https://github.com/HomeOps/PwrHass/issues/5)) ([43aba22](https://github.com/HomeOps/PwrHass/commit/43aba229fe52b58b120f0559d3660db943a53e4b))
+
 ## [0.3.0](https://github.com/HomeOps/PwrHass/compare/v0.2.1...v0.3.0) (2026-04-26)
 
 
