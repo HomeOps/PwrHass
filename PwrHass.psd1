@@ -22,6 +22,7 @@ PowerShellVersion = '5.1'
 FunctionsToExport = @(
     'Connect-HomeAssistant',
     'Get-HAConfig',
+    'Get-HALegacyZWaveRouter',
     'Get-HAState',
     'Get-HAZWaveNode',
     'Invoke-HAService',
