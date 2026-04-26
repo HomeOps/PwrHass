@@ -2,6 +2,41 @@
 <Configuration>
   <ViewDefinitions>
     <View>
+      <Name>PwrHass.EntityCorrelationBucket</Name>
+      <ViewSelectedBy>
+        <TypeName>PwrHass.EntityCorrelationBucket</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader><Label>Bucket</Label><Width>50</Width></TableColumnHeader>
+          <TableColumnHeader><Label>N(min)</Label><Width>8</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>Mean</Label><Width>10</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>P50</Label><Width>10</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>P90</Label><Width>10</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>Max</Label><Width>10</Width><Alignment>Right</Alignment></TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <ScriptBlock>
+                  ($_.Indicators.GetEnumerator() | ForEach-Object {
+                      $short = $_.Key -replace '^[a-z_]+\.', ''
+                      if ($_.Value) { "+$short" } else { "-$short" }
+                  }) -join ' '
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem><PropertyName>SampleMinutes</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>Mean</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>P50</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>P90</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>Max</PropertyName></TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
       <Name>PwrHass.LegacyZWaveRouter</Name>
       <ViewSelectedBy>
         <TypeName>PwrHass.LegacyZWaveRouter</TypeName>
