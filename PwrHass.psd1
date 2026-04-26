@@ -23,7 +23,8 @@ FunctionsToExport = @(
     'Connect-HomeAssistant',
     'Get-HAConfig',
     'Get-HAState',
-    'Invoke-HAService'
+    'Invoke-HAService',
+    'Restart-HAIntegration'
 )
 
 CmdletsToExport = @()
