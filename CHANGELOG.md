@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/HomeOps/PwrHass/compare/v0.2.1...v0.3.0) (2026-04-26)
+
+
+### Features
+
+* -Domain on Invoke-HAService + Restart-HAIntegration cmdlet ([#3](https://github.com/HomeOps/PwrHass/issues/3)) ([a14a640](https://github.com/HomeOps/PwrHass/commit/a14a640e1120a299623a0e1b1689a765be06fa8b))
+
 ## [0.2.1](https://github.com/HomeOps/PwrHass/compare/v0.2.0...v0.2.1) (2026-04-25)
 
 
