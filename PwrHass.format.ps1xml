@@ -8,8 +8,9 @@
       </ViewSelectedBy>
       <TableControl>
         <TableHeaders>
-          <TableColumnHeader><Label>Pri</Label><Width>3</Width></TableColumnHeader>
-          <TableColumnHeader><Label>Tier</Label><Width>32</Width></TableColumnHeader>
+          <TableColumnHeader><Label>Pri</Label><Width>3</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>Reason</Label><Width>28</Width></TableColumnHeader>
+          <TableColumnHeader><Label>Gen</Label><Width>10</Width></TableColumnHeader>
           <TableColumnHeader><Label>Node</Label><Width>4</Width><Alignment>Right</Alignment></TableColumnHeader>
           <TableColumnHeader><Label>Model</Label><Width>16</Width></TableColumnHeader>
           <TableColumnHeader><Label>FW</Label><Width>7</Width></TableColumnHeader>
@@ -18,17 +19,9 @@
         <TableRowEntries>
           <TableRowEntry>
             <TableColumnItems>
-              <TableColumnItem>
-                <ScriptBlock>
-                  switch -Wildcard ($_.Tier) {
-                    'T1*' { '!!!' }
-                    'T2*' { '!!' }
-                    'T3*' { '!' }
-                    default { '·' }
-                  }
-                </ScriptBlock>
-              </TableColumnItem>
-              <TableColumnItem><PropertyName>Tier</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>Priority</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>PriorityReason</PropertyName></TableColumnItem>
+              <TableColumnItem><PropertyName>Generation</PropertyName></TableColumnItem>
               <TableColumnItem><PropertyName>NodeId</PropertyName></TableColumnItem>
               <TableColumnItem><PropertyName>Model</PropertyName></TableColumnItem>
               <TableColumnItem><PropertyName>SoftwareVersion</PropertyName></TableColumnItem>

@@ -6,46 +6,40 @@ function Get-HALegacyZWaveRouter {
     they relay for other devices.
 
     .DESCRIPTION
-    Wraps Get-HAZWaveNode and tiers each candidate router by silicon
-    generation:
+    Wraps Get-HAZWaveNode and assigns each candidate router a numeric
+    Priority and a Generation label:
 
-      T1 gen-1               ZW1001 plug-ins. Pre-Z-Wave-Plus. NO S2. Highest-priority swap.
-      T2 gen-2 (400-series)  ZW3005, ZW4005. Z-Wave Plus but no S2. Should swap.
-      T3 early 500-series    WD500Z. S2 unsupported on shipped firmware. Should swap.
-      T4 mid 500-series      ZW3008, ZW4006. S2 firmware-dependent (5.39+ usually OK). Watch.
+      Priority 1 (replace)       No S2 capability at all. ZW1001, ZW3005,
+                                 ZW4005, WD500Z. Will never carry S2 frames
+                                 cleanly regardless of firmware. Replace.
+      Priority 2 (watch)         S2 firmware-dependent. ZW3008, ZW4006.
+                                 Modern firmware (5.39+) usually OK; early
+                                 firmware in this family had SPAN-cache and
+                                 FLiRS-beam bugs.
 
     Battery-only / non-routing devices (locks, sensors, sirens, the
     controller itself) are excluded — they don't relay frames so they
-    can't corrupt them. The list focuses specifically on always-on
-    mains-powered devices that participate as repeaters.
+    can't corrupt them.
 
-    Why this matters: a single corrupting repeater in the routing path
-    can cause "Dropping message with invalid payload" log spam and lead
-    to the controller marking otherwise-healthy nodes as `dead`. The
-    cure is to swap the legacy hardware for S2-clean equivalents
-    (700/800-series silicon).
+    Default sort is Priority ascending, then NodeId ascending — worst
+    devices first.
 
     .PARAMETER IncludeWatchlist
-    Include T4 (mid 500-series) nodes that are probably OK on current
-    firmware. Default: included. Pass -IncludeWatchlist:$false to see
-    only the must-go T1/T2/T3 nodes.
+    Include Priority-2 (firmware-dependent) nodes. Default: $true.
+    Pass -IncludeWatchlist:$false to see only Priority-1 (must-replace).
 
     .PARAMETER ModelMap
-    Override the model→tier classification. Default covers the most
-    common GE/Jasco/Nortek legacy hardware. Add custom entries for
-    other vendors as needed:
-      @{ 'YOUR_MODEL_REGEX' = 'T1 your-tier-label' }
+    Override the model→{Priority, Generation} classification. Format:
+      @{ 'MODEL_REGEX' = @{ Priority = N; Generation = 'label' } }
 
     .EXAMPLE
     Get-HALegacyZWaveRouter
 
     .EXAMPLE
-    # Just the must-go nodes
-    Get-HALegacyZWaveRouter -IncludeWatchlist:$false
+    Get-HALegacyZWaveRouter -IncludeWatchlist:$false   # must-replace only
 
     .EXAMPLE
-    # Group by tier for a quick swap-priority view
-    Get-HALegacyZWaveRouter | Group-Object Tier | Format-Table Count, Name -AutoSize
+    Get-HALegacyZWaveRouter | Group-Object Priority | Format-Table Count, Name -AutoSize
     #>
     [CmdletBinding()]
     [OutputType('PwrHass.LegacyZWaveRouter')]
@@ -53,12 +47,12 @@ function Get-HALegacyZWaveRouter {
         [bool]$IncludeWatchlist = $true,
 
         [hashtable]$ModelMap = @{
-            'ZW1001' = 'T1 gen-1 (no S2)'
-            'ZW3005' = 'T2 gen-2 (no S2)'
-            'ZW4005' = 'T2 gen-2 (no S2)'
-            'WD500Z' = 'T3 early-500 (no S2)'
-            'ZW3008' = 'T4 mid-500 (firmware-dependent)'
-            'ZW4006' = 'T4 mid-500 (firmware-dependent)'
+            'ZW1001' = @{ Priority = 1; Generation = 'gen-1';     PriorityReason = 'no S2 (pre-Z-Wave-Plus)' }
+            'ZW3005' = @{ Priority = 1; Generation = 'gen-2';     PriorityReason = 'no S2 (400-series)' }
+            'ZW4005' = @{ Priority = 1; Generation = 'gen-2';     PriorityReason = 'no S2 (400-series)' }
+            'WD500Z' = @{ Priority = 1; Generation = 'early-500'; PriorityReason = 'no S2 in shipped firmware' }
+            'ZW3008' = @{ Priority = 2; Generation = 'mid-500';   PriorityReason = 'S2 firmware-dependent' }
+            'ZW4006' = @{ Priority = 2; Generation = 'mid-500';   PriorityReason = 'S2 firmware-dependent' }
         }
     )
 
@@ -67,14 +61,17 @@ function Get-HALegacyZWaveRouter {
     Get-HAZWaveNode |
         Where-Object { $_.Model -match $regex } |
         ForEach-Object {
-            $tier = $null
+            $entry = $null
             foreach ($k in $ModelMap.Keys) {
-                if ($_.Model -match $k) { $tier = $ModelMap[$k]; break }
+                if ($_.Model -match $k) { $entry = $ModelMap[$k]; break }
             }
-            if (-not $IncludeWatchlist -and $tier -like 'T4*') { return }
+            if (-not $entry) { return }
+            if (-not $IncludeWatchlist -and $entry.Priority -ge 2) { return }
 
             $rec = [PSCustomObject]@{
-                Tier            = $tier
+                Priority        = [int]$entry.Priority
+                PriorityReason  = $entry.PriorityReason
+                Generation      = $entry.Generation
                 NodeId          = $_.NodeId
                 Model           = $_.Model
                 SoftwareVersion = $_.SoftwareVersion
@@ -83,5 +80,5 @@ function Get-HALegacyZWaveRouter {
             }
             $rec.PSTypeNames.Insert(0, 'PwrHass.LegacyZWaveRouter')
             $rec
-        } | Sort-Object Tier, NodeId
+        } | Sort-Object Priority, NodeId
 }
