@@ -43,8 +43,8 @@
       </ViewSelectedBy>
       <TableControl>
         <TableHeaders>
-          <TableColumnHeader><Label>Pri</Label><Width>3</Width><Alignment>Right</Alignment></TableColumnHeader>
-          <TableColumnHeader><Label>Reason</Label><Width>28</Width></TableColumnHeader>
+          <TableColumnHeader><Label>Pri</Label><Width>4</Width><Alignment>Right</Alignment></TableColumnHeader>
+          <TableColumnHeader><Label>Reason</Label><Width>52</Width></TableColumnHeader>
           <TableColumnHeader><Label>Gen</Label><Width>10</Width></TableColumnHeader>
           <TableColumnHeader><Label>Node</Label><Width>4</Width><Alignment>Right</Alignment></TableColumnHeader>
           <TableColumnHeader><Label>Model</Label><Width>16</Width></TableColumnHeader>
