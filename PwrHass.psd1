@@ -7,7 +7,7 @@
 RootModule = 'PwrHass.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.5.0' # x-release-please-version
+ModuleVersion = '0.6.0' # x-release-please-version
 
 GUID = 'b7f1c2d3-9a4e-4d8b-9f1a-7c2b3d4e5f6a'
 
